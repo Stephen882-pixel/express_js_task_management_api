@@ -169,4 +169,28 @@ const forgotPassword = async(require,res) => {
     }
 };
 
+const verifyResetOTP = async (req,res) => {
+    try{
+        const { email, otpCode } = req.body;
+
+
+        if(!email || !otpCode){
+             return res.status(400).json({ error: 'Email and OTP code are required' });
+        }
+
+        const otp =await userModel.verifyOTP(email,otpCode,'password_reset');
+
+        if(!otp){
+            return res.status(400).json({ error: 'Invalid or expired OTP code' });
+        }
+
+        await userModel.markOTPAsUsed(otp.id);
+
+        res.json({ message: 'OTP verified. You can now reset your password.' });
+    }catch(error){
+        console.error('Error in verifyResetOTP:', error);
+        res.status(500).json({ error: 'Failed to verify OTP' });
+    }
+};
+
 
