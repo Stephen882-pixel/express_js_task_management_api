@@ -225,3 +225,55 @@ const resetPassword = async (req,res) => {
         res.status(500).json({ error: 'Failed to reset password' });
     }
 };
+
+const changePassword = async(req,res) => {
+    try{
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        const userId = req.user.userId;
+
+        if(!currentPassword || !newPassword || !confirmPassword){
+             return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        if(newPassword !== confirmPassword){
+            return res.status(400).json({ error: 'New passwords do not match' });
+        }
+
+         if (!authUtils.isStrongPassword(newPassword)) {
+            return res.status(400).json({ 
+                error: 'Password must be at least 8 characters with uppercase, lowercase, and number' 
+            });
+        }
+
+
+        const user =  await userModel.findUserById(userId);
+        const fulluser = await userModel.findUserByEmail(user.email);
+
+
+        const isPasswordValid = await authUtils.comparePassword(currentPassword, fulluser.passwordHash);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Current password is incorrect' });
+        }
+
+        const newPasswordHash = await authUtils.hashPassword(newPassword);
+
+        await userModel.updatePassword(user.email, newPasswordHash);
+        
+        res.json({ message: 'Password changed successfully' });
+    }catch (error){
+        console.error('Error in changePassword:', error);
+        res.status(500).json({ error: 'Failed to change password' });
+    }
+};
+
+
+module.exports = {
+    signup,
+    verifyOTP,
+    login,
+    forgotPassword,
+    verifyResetOTP,
+    resetPassword,
+    changePassword,
+};
