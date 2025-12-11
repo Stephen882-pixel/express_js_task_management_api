@@ -82,3 +82,17 @@ const isStrongPassword = (password) => {
     return passwordRegex.test(password);
 };
 
+
+module.exports = {
+    generateOTP,
+    hashPassword,
+    comparePassword,
+    generateAccessToken,
+    generateRefreshToken,
+    verifyAccessToken,
+    verifyRefreshToken,
+    getTokenExpiry,
+    isValidEmail,
+    isStrongPassword,
+};
+
