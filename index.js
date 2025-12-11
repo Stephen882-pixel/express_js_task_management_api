@@ -52,7 +52,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/todos', todoRoutes);
 
-app.use('/todos', todoRoutes);
 
 
 app.use((req, res) => {
