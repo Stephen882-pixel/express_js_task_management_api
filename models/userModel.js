@@ -22,3 +22,12 @@ const findUserByEmail = async (userId) => {
     return result.rows[0];
 };
 
+
+// Update user verification status
+const verifyUser = async (email) => {
+    const result = await pool.query(
+        'UPDATE users SET is_verified = TRUE WHERE EMAIL = $1 RETURNING *',
+        [newPasswordHash,email]
+    );
+};
+
