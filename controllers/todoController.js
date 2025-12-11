@@ -110,3 +110,11 @@ const deleteTodo = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete todo' });
     }
 };
+
+module.exports = {
+    getAllTodos,
+    getTodoById,
+    createTodo,
+    updateTodo,
+    deleteTodo
+};
