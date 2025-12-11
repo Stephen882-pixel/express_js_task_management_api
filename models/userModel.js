@@ -70,6 +70,39 @@ const deleteUser = async (userId) => {
     return result.rows[0];
 };
 
+// save otp code
+const saveOTP = async(email, otpCode, purpose,userId = null) => {
+    const expiresAt = new Date(Date.now() + 10 * 60 * 10000); // 10 minutes
+
+    const result = await pool.query(
+        `INSERT INTO otp_codes (user_id, email, otp_code, purpose, expires_at) 
+         VALUES ($1, $2, $3, $4, $5) 
+         RETURNING *`,
+        [userId, email, otpCode, purpose, expiresAt]
+    );
+
+    return result.rows[0];
+};
+
+// Verify OTP code
+const verifyOTP = async(email,otpCode,purpose) => {
+    const result = await pool.query(
+        `SELECT * FROM otp_codes 
+         WHERE email = $1 
+         AND otp_code = $2 
+         AND purpose = $3 
+         AND is_used = FALSE 
+         AND expires_at > NOW()
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [email, otpCode, purpose]
+    );
+
+    return result.rows[0];
+};
+
+
+
 
 
 
