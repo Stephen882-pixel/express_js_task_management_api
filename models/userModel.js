@@ -120,6 +120,17 @@ const saveRefreshToken = async(userId, token, expiresAt) => {
 };
 
 
+// Find refresh token
+const findRefreshToken = async (token) => {
+    const result = await pool.query(
+         'SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
+        [token]
+    );
+    return result.rows[0];
+};
+
+// Delete refresh token
+
 
 
 
