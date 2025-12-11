@@ -60,6 +60,20 @@ const updateUserProfile =  async (userId, updateData) => {
     return result.rows[0];
 };
 
+// Delete user account
+const deleteUser = async (userId) => {
+    const result = await pool.query(
+        'DELETE FROM users WHERE id = $1 RETURNING id',
+        [userId]
+    );
+
+    return result.rows[0];
+};
+
+
+
+
+
 
 
 
