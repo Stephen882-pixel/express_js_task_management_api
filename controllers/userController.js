@@ -84,3 +84,8 @@ const deleteAccount = async (req,res) => {
     }
 };
 
+module.exports = {
+    getProfile,
+    updateProfile,
+    deleteAccount,
+};
