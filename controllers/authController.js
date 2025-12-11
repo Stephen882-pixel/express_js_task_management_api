@@ -59,3 +59,33 @@ const signup = async (req,res) => {
     }
 };
 
+// Verify OTP (signup)
+const verifyOTP = async (req,res) => {
+    try{
+        const{ email, otpCode } = req.body;
+
+        if(!email || !otpCode){
+            return res.status(400).json({
+                error:'Email and OTP code are required'
+            });
+        }
+
+        const otp = await userModel.verifyOTP(email,otpCode,'signup');
+
+        if(!otp){
+            return res.status(400).json({error:'Invalid or expired OTP code'});
+        }
+
+        await userModel.markOTPAsUsed(otp.id);
+
+        await userModel.verifyUser(email);
+
+        res.json({message:'Email verified successfully! You can now log in.'});
+    } catch (error){
+        console.error('Error in verifyOTP:', error);
+        res.status(500).json({ error: 'Failed to verify OTP' });
+    }
+};
+
+
+
