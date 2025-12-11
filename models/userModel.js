@@ -137,6 +137,24 @@ const deleteRefreshToken = async (token) => {
     );
 };
 
+module.exports = {
+    createUser,
+    findUserByEmail,
+    findUserById,
+    verifyUser,
+    updatePassword,
+    updateUserProfile,
+    deleteUser,
+    saveOTP,
+    verifyOTP,
+    markOTPAsUsed,
+    saveRefreshToken,
+    findRefreshToken,
+    deleteRefreshToken,
+};
+
+
+
 
 
 
