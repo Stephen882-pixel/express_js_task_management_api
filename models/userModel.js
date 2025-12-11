@@ -130,6 +130,14 @@ const findRefreshToken = async (token) => {
 };
 
 // Delete refresh token
+const deleteRefreshToken = async (token) => {
+    await pool.query(
+        'DELETE FROM refresh_tokens WHERE token = $1',
+        [token]
+    );
+};
+
+
 
 
 
