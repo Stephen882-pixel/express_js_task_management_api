@@ -101,6 +101,14 @@ const verifyOTP = async(email,otpCode,purpose) => {
     return result.rows[0];
 };
 
+// Mark OTP as used
+const markOTPAsUsed = async(otpId) => {
+    await pool.query(
+        'UPDATE otp_codes SET is_used = TRUE WHERE id = $1',
+        [otpId]
+    );
+};
+
 
 
 
