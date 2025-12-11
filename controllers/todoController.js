@@ -1,3 +1,4 @@
+const e = require('express');
 const todoModel = require('../models/todoModel');
 
 const getAllTodos = async (req,res) => {
@@ -29,6 +30,30 @@ const getTodoById = async (req,res) => {
     } catch(error){
         console.error('Error in getTodoById:',error);
         res.status(500).json({error: 'Failed to fetch todo'});
+    }
+};
+
+const createTodo = async (req,res) => {
+    try{
+        const { task, tags, status } = req.body;
+
+
+        if(!task || task.trim().length === 0){
+            return res.status(400).json({error: 'Task is required'});
+        }
+
+        const validStatuses = ['todo', 'doing', 'done'];
+        if (status && !validStatuses.includes(status)) {
+            return res.status(400).json({ 
+                error: 'Status must be one of: todo, doing, done' 
+            });
+        }
+
+        const newTodo = await todoModel.createTodo({task,tags,status});
+        res.status(201).json(newTodo);
+    }catch(error){
+        console.error('Error in createTodo:',error);
+        res.status(500).json({error:'Failed to create todo'});
     }
 };
 
