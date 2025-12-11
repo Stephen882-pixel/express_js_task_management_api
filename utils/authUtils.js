@@ -15,3 +15,15 @@ const hashPassword = async (password) => {
 const comparePassword = async (password, hash) => {
     return await bcrypt.compare(password,hash);
 };
+
+
+const generateAccessToken = (userId,email) => {
+    return jwt.sign(
+        { userId, email },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_ACCESS_EXPIRY || 15 }
+    );
+};
+
+
+
