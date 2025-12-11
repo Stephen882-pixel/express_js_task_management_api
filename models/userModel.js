@@ -29,5 +29,37 @@ const verifyUser = async (email) => {
         'UPDATE users SET is_verified = TRUE WHERE EMAIL = $1 RETURNING *',
         [newPasswordHash,email]
     );
+
+    return result.rows[0];
 };
+
+
+// update user password
+const updatePassword = async (email, newPasswordHash) => {
+    const result = await pool.query(
+        'UPDATE users SET password_hash = $1 WHERE email = $2 RETURNING id',
+        [newPasswordHash, email]
+    );
+
+    return result.rows[0];
+};
+
+// Update user profile
+const updateUserProfile =  async (userId, updateData) => {
+    const { firstName,lastName, email } = updateData;
+
+    const result = await pool.query(
+        `UPDATE users 
+         SET first_name = COALESCE($1, first_name),
+             last_name = COALESCE($2, last_name),
+             email = COALESCE($3, email)
+         WHERE id = $4 
+         RETURNING id, first_name, last_name, email, is_verified, created_at, updated_at`,
+        [firstName, lastName, email, userId]
+    );
+    return result.rows[0];
+};
+
+
+
 
