@@ -1,7 +1,7 @@
 const userModel = require('../models/userModel');
 const authUtils = require('../utils/authUtils');
 const emailService = require('../services/emailService');
-const { use } = require('react');
+
 
 
 // sign up
@@ -86,19 +86,17 @@ const verifyOTP = async (req,res) => {
         res.status(500).json({ error: 'Failed to verify OTP' });
     }
 };
-
-const login = async(req,res) => {
-    try{
+const login = async (req, res) => {
+    try {
         const { email, password } = req.body;
 
-        if(!email || !password){
+        if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
-
         const user = await userModel.findUserByEmail(email);
 
-        if(!user){
+        if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
@@ -106,17 +104,24 @@ const login = async(req,res) => {
             return res.status(403).json({ error: 'Please verify your email first' });
         }
 
-        const isPasswordValid = await authUtils.comparePassword(password,user.passwordHash);
+        const isPasswordValid = await authUtils.comparePassword(
+            password,
+            user.password_hash   // << Correct
+        );
 
-        if(!isPasswordValid){
+        if (!isPasswordValid) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        const accessToken = authUtils.generateAccessToken(user.is,user.email);
-        const refreshToken = authUtils.generateRefreshToken(user.is,user.email);
-        
+        // Generate tokens
+        const accessToken = authUtils.generateAccessToken(user.id, user.email);
+        const refreshToken = authUtils.generateRefreshToken(user.id, user.email);
+
+        // Calculate refresh expiry
         const refreshExpiry = authUtils.getTokenExpiry(process.env.JWT_REFRESH_EXPIRY || '7d');
-        await userModel.saveRefreshToken(useReducer.id,refreshToken,refreshExpiry);
+
+        // Save refresh token
+        await userModel.saveRefreshToken(user.id, refreshToken, refreshExpiry);
 
         res.json({
             message: 'Login successful',
@@ -131,11 +136,13 @@ const login = async(req,res) => {
                 email: user.email
             }
         });
-    } catch (error){
+
+    } catch (error) {
         console.error('Error in login:', error);
         res.status(500).json({ error: 'Failed to log in' });
     }
 };
+
 
 
 //forgot password
