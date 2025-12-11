@@ -1,6 +1,6 @@
 const userModel = require('../models/userModel');
 const authUtils = require('../utils/authUtils');
-const emailServie = require('../services/emailService');
+const emailService = require('../services/emailService');
 const { use } = require('react');
 
 
@@ -47,7 +47,7 @@ const signup = async (req,res) => {
         const otpCode = authUtils.generateOTP();
         await userModel.saveOTP(email, otpCode, 'signup', user.id);
 
-        await emailServie.sendSignUpOTP(email,firstName,otpCode);
+        await emailService.sendSignUpOTP(email,firstName,otpCode);
 
         res.status(201).json({
             message: 'Signup successful! Please check your email for OTP verification.',
@@ -134,6 +134,38 @@ const login = async(req,res) => {
     } catch (error){
         console.error('Error in login:', error);
         res.status(500).json({ error: 'Failed to log in' });
+    }
+};
+
+
+//forgot password
+const forgotPassword = async(require,res) => {
+    try{
+        const { email } = req.body;
+
+        if(!email){
+            return res.status(400).json({ error: 'Email is required' });
+        }
+
+        const user = await userModel.findUserByEmail(email);
+
+        if(!user){
+            // Don't reveal if email exists
+            return res.json({ message: 'If email exists, OTP has been sent' });
+        }
+
+        const otpCode = authUtils.generateOTP();
+        await userModel.saveOTP(email,otpCode,'password_reset',user.id);
+
+
+        await emailService.sendPasswordResetOTP(email,'password_reset',user.id)
+
+
+        res.json({ message: 'If email exists, OTP has been sent' });
+        
+    } catch(error){
+        console.error('Error in forgotPassword:', error);
+        res.status(500).json({ error: 'Failed to process request' });
     }
 };
 
