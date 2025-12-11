@@ -70,3 +70,17 @@ const updateTodo = async (id,todoData) => {
     }
 };
 
+
+const deleteTodo = async (id) => {
+    try{
+        const result = await pool.query(
+            'DELETE FROM todos WHERE id = $1 RETURNING *',
+            [id]
+        );
+
+        return result.rows[0];
+    } catch (error){
+        throw error;
+    }
+};
+
