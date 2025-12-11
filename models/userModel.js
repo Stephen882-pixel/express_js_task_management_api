@@ -14,4 +14,11 @@ const createUser = async(userData) => {
 };
 
 
+const findUserByEmail = async (userId) => {
+    const result = await pool.query(
+        'SELECT id, first_name, last_name, email, is_verified, created_at, updated_at FROM users WHERE id = $1',
+        [userId]
+    );
+    return result.rows[0];
+};
 
