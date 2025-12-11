@@ -84,3 +84,11 @@ const deleteTodo = async (id) => {
     }
 };
 
+
+module.exports = {
+    getAllTodos,
+    getTodoById,
+    createTodo,
+    updateTodo,
+    deleteTodo
+}
