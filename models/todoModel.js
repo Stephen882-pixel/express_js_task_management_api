@@ -39,3 +39,34 @@ const createTodo = async (todoData) => {
     }
 }; 
 
+
+const updateTodo = async (id,todoData) => {
+    try{
+        const existingTodo = await getTodoById(id);
+
+        if(!existingTodo){
+            return null;
+        }
+        const { task, tags, status } = todoData;
+
+        const result = await pool.query(
+            `UPDATE todos
+            SET task = $1,
+                tags = $2,
+                status = $3,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $4
+            RETURNING *`,
+            [
+                task || existingTodo.task,
+                tags || existingTodo.tags,
+                status || existingTodo.status,
+                id
+            ]
+        );
+        return result.rows[0];
+    } catch (error){
+        throw error;
+    }
+};
+
