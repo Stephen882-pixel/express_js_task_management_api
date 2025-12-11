@@ -194,3 +194,34 @@ const verifyResetOTP = async (req,res) => {
 };
 
 
+const resetPassword = async (req,res) => {
+    try{
+        const{ email, newPassword, confirmPassword } = req.body;
+
+        if(!email || !newPassword || !confirmPassword){
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        if(newPassword !== confirmPassword){
+            return res.status(400).json({ error: 'Passwords do not match' });
+        }
+        if(!authUtils.isStrongPassword(newPassword)){
+            return res.status(400).json({
+                error: 'Password must be at least 8 characters with uppercase, lowercase, and number' 
+            });
+        }
+        const newPasswordHash = await authUtils.hashPassword(newPassword);
+
+
+        const user = await userModel.updatePassword(email,newPasswordHash);
+
+        if(!user){
+             return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'Password reset successfully' });
+    } catch(error){
+        console.error('Error in resetPassword:', error);
+        res.status(500).json({ error: 'Failed to reset password' });
+    }
+};
