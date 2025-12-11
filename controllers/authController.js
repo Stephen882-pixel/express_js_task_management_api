@@ -87,5 +87,54 @@ const verifyOTP = async (req,res) => {
     }
 };
 
+const login = async(req,res) => {
+    try{
+        const { email, password } = req.body;
+
+        if(!email || !password){
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+
+        const user = await userModel.findUserByEmail(email);
+
+        if(!user){
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        if (!user.is_verified) {
+            return res.status(403).json({ error: 'Please verify your email first' });
+        }
+
+        const isPasswordValid = await authUtils.comparePassword(password,user.passwordHash);
+
+        if(!isPasswordValid){
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const accessToken = authUtils.generateAccessToken(user.is,user.email);
+        const refreshToken = authUtils.generateRefreshToken(user.is,user.email);
+        
+        const refreshExpiry = authUtils.getTokenExpiry(process.env.JWT_REFRESH_EXPIRY || '7d');
+        await userModel.saveRefreshToken(useReducer.id,refreshToken,refreshExpiry);
+
+        res.json({
+            message: 'Login successful',
+            accessToken,
+            refreshToken,
+            accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+            refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
+            user: {
+                id: user.id,
+                firstName: user.first_name,
+                lastName: user.last_name,
+                email: user.email
+            }
+        });
+    } catch (error){
+        console.error('Error in login:', error);
+        res.status(500).json({ error: 'Failed to log in' });
+    }
+};
 
 
