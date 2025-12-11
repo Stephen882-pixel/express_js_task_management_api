@@ -28,3 +28,41 @@ const getProfile = async (requestAnimationFrame,res) => {
     }
 };
 
+const updateProfile = async (req,res) => {
+    try{
+        const userId = req.user.userId;
+        const { firstName, lastName, email } = req.body;
+
+        if(email){
+            const existingUser = await userModel.findUserByEmail(email);
+            if(existingUser &&existingUser.id !== userId){
+                return res.status(409).json({ error: 'Email already in use' });
+            }
+        }
+        const updateUser = await userModel.updateUserProfile(userId,{
+            firstName,
+            lastName,
+            email
+        });
+
+        if(!updateUser){
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                id: updatedUser.id,
+                firstName: updatedUser.first_name,
+                lastName: updatedUser.last_name,
+                email: updatedUser.email,
+                isVerified: updatedUser.is_verified,
+                updatedAt: updatedUser.updated_at
+            }
+        });
+    } catch(error){
+        console.error('Error in updateProfile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+};
+
