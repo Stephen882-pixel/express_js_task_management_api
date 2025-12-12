@@ -20,11 +20,21 @@ app.get('/',(req,res) => {
 
 app.get('/health', async (req, res) => {
     try {
-        const result = await pool.query('SELECT NOW()');
+        const dbResult = await pool.query('SELECT current_database(), current_user');
+        const tableResult = await pool.query(`
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        `);
+        
         res.json({ 
             status: 'healthy', 
-            database: 'connected',
-            timestamp: result.rows[0].now
+            database: {
+                name: dbResult.rows[0].current_database,
+                user: dbResult.rows[0].current_user,
+                connected: true
+            },
+            tables: tableResult.rows.map(row => row.table_name)
         });
     } catch (error) {
         res.status(500).json({ 
@@ -35,7 +45,13 @@ app.get('/health', async (req, res) => {
     }
 });
 
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.use('/todos', todoRoutes);
+
 
 
 app.use((req, res) => {
